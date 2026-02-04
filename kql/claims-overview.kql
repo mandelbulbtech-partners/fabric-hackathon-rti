@@ -1,0 +1,37 @@
+// Claims Overview Dashboard Queries
+// Microsoft Fabric Hackathon 2025
+
+// Real-Time Claims Summary (Last Hour)
+ClaimsRaw
+| where event_time > ago(1h)
+| summarize
+    TotalClaims = count(),
+    TotalAmount = sum(total_amount),
+    AvgAmount = avg(total_amount),
+    AvgProcessingDays = avg(processing_days)
+
+// Claims by Status (Last 24 Hours)
+ClaimsRaw
+| where event_time > ago(24h)
+| summarize Count = count() by settlement_status
+| render piechart
+
+// Claims Trend (Hourly, Last 24 Hours)
+ClaimsRaw
+| where event_time > ago(24h)
+| summarize ClaimCount = count(), TotalAmount = sum(total_amount) by bin(event_time, 1h)
+| order by event_time asc
+| render timechart
+
+// Claims by Type
+ClaimsRaw
+| where event_time > ago(24h)
+| summarize Count = count(), AvgAmount = avg(total_amount) by claim_type
+| render columnchart
+
+// Top Diagnosis Codes
+ClaimsRaw
+| where event_time > ago(7d)
+| summarize Count = count() by diagnosis_code
+| top 10 by Count desc
+| render barchart

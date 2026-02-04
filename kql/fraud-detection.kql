@@ -1,0 +1,63 @@
+// Fraud Detection Queries
+// Microsoft Fabric Hackathon 2025
+
+// High Amount Anomalies - Potential Fraud
+// Identifies reimbursement claims with high amount and low admissibility ratio
+ClaimsRaw
+| where event_time > ago(1h)
+| where claim_type == "Reimbursement"
+| where total_amount > 100000
+| extend admissibility_ratio = (admissible_amount * 1.0 / total_amount)
+| where admissibility_ratio < 0.7
+| project
+    claim_id,
+    policy_id,
+    hospital_id,
+    total_amount,
+    admissible_amount,
+    admissibility_ratio,
+    event_time
+| order by total_amount desc
+
+// Fraud-Flagged Claims (Denied with Fraud Reason)
+ClaimsRaw
+| where event_time > ago(24h)
+| where denial_reason == "Fraud Suspected"
+| project claim_id, policy_id, hospital_id, total_amount, claim_date, event_time
+| order by event_time desc
+
+// Hospital Fraud Risk Score
+// Hospitals with high denial rates may indicate fraud patterns
+ClaimsRaw
+| where event_time > ago(30d)
+| summarize
+    TotalClaims = count(),
+    DeniedClaims = countif(settlement_status == "Denied"),
+    FraudSuspected = countif(denial_reason == "Fraud Suspected"),
+    AvgAmount = avg(total_amount)
+    by hospital_id
+| extend DenialRate = (DeniedClaims * 100.0 / TotalClaims)
+| extend FraudRate = (FraudSuspected * 100.0 / TotalClaims)
+| where TotalClaims > 10  // Minimum sample size
+| order by FraudRate desc
+| take 20
+
+// Policy Fraud Pattern Detection
+// Policies with multiple denied claims in short timeframe
+ClaimsRaw
+| where event_time > ago(7d)
+| where settlement_status == "Denied"
+| summarize
+    DeniedCount = count(),
+    TotalAmount = sum(total_amount),
+    Hospitals = dcount(hospital_id)
+    by policy_id
+| where DeniedCount > 2
+| order by DeniedCount desc
+
+// Real-Time Fraud Alerts (Last 15 minutes)
+ClaimsRaw
+| where event_time > ago(15m)
+| where denial_reason == "Fraud Suspected"
+| project claim_id, policy_id, hospital_id, total_amount, event_time
+| order by event_time desc

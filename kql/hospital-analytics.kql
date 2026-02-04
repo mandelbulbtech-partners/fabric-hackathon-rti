@@ -1,0 +1,58 @@
+// Hospital Analytics Queries
+// Microsoft Fabric Hackathon 2025
+
+// Top Hospitals by Claims Volume (Last 7 Days)
+ClaimsRaw
+| where event_time > ago(7d)
+| summarize
+    ClaimCount = count(),
+    TotalAmount = sum(total_amount),
+    AvgAmount = avg(total_amount)
+    by hospital_id
+| top 10 by TotalAmount desc
+| render barchart
+
+// Hospital Settlement Performance
+ClaimsRaw
+| where event_time > ago(30d)
+| summarize
+    TotalClaims = count(),
+    SettledClaims = countif(settlement_status == "Settled"),
+    PendingClaims = countif(settlement_status == "Pending"),
+    DeniedClaims = countif(settlement_status == "Denied"),
+    AvgProcessingDays = avg(processing_days)
+    by hospital_id
+| extend SettlementRate = (SettledClaims * 100.0 / TotalClaims)
+| order by TotalClaims desc
+| take 20
+
+// Hospital Claims Trend (Daily)
+ClaimsRaw
+| where event_time > ago(30d)
+| summarize ClaimCount = count() by hospital_id, bin(event_time, 1d)
+| order by event_time asc
+
+// Hospital Admissibility Analysis
+// Identifies hospitals with consistently low admissibility ratios
+ClaimsRaw
+| where event_time > ago(30d)
+| extend admissibility_ratio = (admissible_amount * 1.0 / total_amount)
+| summarize
+    AvgAdmissibility = avg(admissibility_ratio),
+    ClaimCount = count(),
+    TotalBilled = sum(total_amount),
+    TotalAdmissible = sum(admissible_amount)
+    by hospital_id
+| extend Leakage = TotalBilled - TotalAdmissible
+| where ClaimCount > 10
+| order by AvgAdmissibility asc
+| take 20
+
+// Hospital Real-Time Activity (Last Hour)
+ClaimsRaw
+| where event_time > ago(1h)
+| summarize
+    ClaimCount = count(),
+    TotalAmount = sum(total_amount)
+    by hospital_id
+| top 10 by ClaimCount desc
