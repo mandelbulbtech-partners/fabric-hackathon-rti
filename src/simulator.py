@@ -6,6 +6,7 @@ Streaming FACT table for RTI Dashboard (Microsoft Fabric)
 Microsoft Fabric Hackathon 2025 - Real-Time Intelligence Category
 """
 
+import os
 import sys
 import json
 import random
@@ -19,27 +20,6 @@ from azure.eventhub import EventData
 
 # ---------------- GLOBAL ----------------
 shutdown_event = asyncio.Event()
-
-# ---------------- LOAD CONFIG ----------------
-def load_config(path=None) -> Dict[str, Any]:
-    """Load configuration from JSON file."""
-    if path is None:
-        # Search for config in multiple locations
-        possible_paths = [
-            "config/eventhub.json",           # From project root
-            "../config/eventhub.json",        # From src/ directory
-            "eventhub.json",                  # Local file
-            "config.json"                     # Legacy fallback
-        ]
-        for p in possible_paths:
-            try:
-                with open(p) as f:
-                    return json.load(f)
-            except FileNotFoundError:
-                continue
-        raise FileNotFoundError("No configuration file found")
-    with open(path) as f:
-        return json.load(f)
 
 # ---------------- UTILS ----------------
 def now_utc():
@@ -203,24 +183,17 @@ async def main():
     print("Microsoft Fabric Hackathon 2025 - RTI Category")
     print("=" * 60)
 
-    # Load configuration
-    try:
-        config = load_config()
-    except FileNotFoundError:
-        print("\nERROR: Configuration file not found!")
-        print("Please copy config/eventhub.json.example to config/eventhub.json")
-        print("and add your Event Hub credentials.")
-        sys.exit(1)
-
-    sim = config.get("simulator", {})
-    eh = config.get("eventhub", {})
-
-    rate = sim.get("default_rate", 1000)
-    hub_name = eh.get("name", "claims-stream")
-    conn_string = eh.get("connection_string", "")
+    # Load configuration from environment variables
+    conn_string = os.environ.get("EVENTHUB_CONNECTION_STRING", "")
+    hub_name = os.environ.get("EVENTHUB_NAME", "claims-stream")
+    rate = int(os.environ.get("SIMULATOR_RATE", "1000"))
 
     if not conn_string:
-        print("\nERROR: Event Hub connection_string not configured!")
+        print("\nERROR: EVENTHUB_CONNECTION_STRING environment variable not set!")
+        print("\nUsage:")
+        print("  set EVENTHUB_CONNECTION_STRING=Endpoint=sb://...")
+        print("  set EVENTHUB_NAME=claims-stream")
+        print("  python src/simulator.py")
         sys.exit(1)
 
     print(f"\nConfiguration:")

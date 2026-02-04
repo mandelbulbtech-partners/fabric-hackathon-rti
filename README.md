@@ -80,19 +80,14 @@ cd fabric-hackathon-rti
 pip install azure-eventhub
 ```
 
-### 2. Configure
+### 2. Configure & Run Simulator
 
 ```bash
-# Copy config templates
-cp config/eventhub.json.example config/eventhub.json
+# Set environment variables
+set EVENTHUB_CONNECTION_STRING=Endpoint=sb://YOUR_NAMESPACE.servicebus.windows.net/;...
+set EVENTHUB_NAME=claims-stream
 
-# Edit with your credentials
-# config/eventhub.json
-```
-
-### 3. Run Simulator
-
-```bash
+# Run simulator
 python src/simulator.py
 ```
 
@@ -134,9 +129,7 @@ fabric-hackathon-rti/
 │       └── hospital-analytics.kql
 │
 └── config/                        # Configuration templates
-    ├── eventhub.json.example      # Event Hub config
-    ├── datalake.json.example      # Data Lake Storage config
-    └── fabric.json.example        # Fabric workspace config
+    └── datalake.json.example      # Data Lake shortcut credentials
 ```
 
 ---
@@ -226,27 +219,25 @@ ClaimsRaw
 
 ## Configuration Reference
 
-### Event Hub Connection
-```json
-{
-  "eventhub": {
-    "connection_string": "Endpoint=sb://NAMESPACE.servicebus.windows.net/;...",
-    "name": "claims-stream"
-  }
-}
+### Event Hub (Environment Variables)
+```bash
+EVENTHUB_CONNECTION_STRING=Endpoint=sb://NAMESPACE.servicebus.windows.net/;...
+EVENTHUB_NAME=claims-stream
+SIMULATOR_RATE=1000  # Optional, default 1000 events/sec
 ```
 
-### Data Lake Storage
+### Data Lake Shortcut Credentials
 ```json
 {
   "datalake": {
     "url": "https://ACCOUNT.dfs.core.windows.net/",
-    "sas_token": "sv=2024-11-04&ss=bf&..."
+    "sas_token": "sv=2024-11-04&ss=bf&...",
+    "account_key": "YOUR_ACCOUNT_KEY"
   }
 }
 ```
 
-> See [`config/`](config/) for complete templates.
+> Use these credentials to create a [OneLake shortcut](https://learn.microsoft.com/en-us/fabric/onelake/onelake-shortcuts) to your Data Lake.
 
 ---
 

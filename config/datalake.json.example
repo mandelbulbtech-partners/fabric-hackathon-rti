@@ -1,17 +1,7 @@
 {
   "datalake": {
-    "storage_account": "YOUR_STORAGE_ACCOUNT",
     "url": "https://YOUR_STORAGE_ACCOUNT.dfs.core.windows.net/",
-    "container": "claims-data",
-    "authentication": {
-      "method": "sas_token",
-      "sas_token": "sv=2024-11-04&ss=bf&srt=sc&sp=rwdlaciytfx&se=EXPIRY_DATE&st=START_DATE&spr=https&sig=YOUR_SIGNATURE",
-      "account_key": "YOUR_ACCOUNT_KEY_IF_USING_KEY_AUTH"
-    }
-  },
-  "onelake": {
-    "workspace": "YOUR_WORKSPACE_NAME",
-    "lakehouse": "YOUR_LAKEHOUSE_NAME",
-    "url": "https://onelake.dfs.fabric.microsoft.com/YOUR_WORKSPACE/YOUR_LAKEHOUSE.Lakehouse"
+    "sas_token": "sv=2024-11-04&ss=bf&srt=sc&sp=rwdlaciytfx&se=EXPIRY_DATE&st=START_DATE&spr=https&sig=YOUR_SIGNATURE",
+    "account_key": "YOUR_ACCOUNT_KEY"
   }
 }

@@ -76,27 +76,18 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 2.4: Configure Credentials
+### Step 2.4: Configure & Run Simulator
+
+Set environment variables with your Event Hub credentials from Step 1.3:
 
 ```bash
-cp config/eventhub.json.example config/eventhub.json
-```
+# Windows
+set EVENTHUB_CONNECTION_STRING=YOUR_CONNECTION_STRING_FROM_STEP_1.3
+set EVENTHUB_NAME=claims-stream
 
-Edit `config/eventhub.json` with your Event Hub details:
-
-```json
-{
-  "simulator": {
-    "default_rate": 1000,
-    "batch_size": 100
-  },
-  "eventhub": {
-    "namespace": "YOUR_NAMESPACE.servicebus.windows.net",
-    "name": "claims-stream",
-    "connection_string": "YOUR_CONNECTION_STRING_FROM_STEP_1.3",
-    "consumer_group": "$Default"
-  }
-}
+# macOS/Linux
+export EVENTHUB_CONNECTION_STRING=YOUR_CONNECTION_STRING_FROM_STEP_1.3
+export EVENTHUB_NAME=claims-stream
 ```
 
 ### Step 2.5: Test the Simulator
