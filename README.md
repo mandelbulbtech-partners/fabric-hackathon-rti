@@ -21,65 +21,46 @@
 
 ## The Problem
 
-Insurance companies process **millions of claims annually**, yet most operate with batch processing systems that introduce critical delays:
+Insurance companies process **millions of claims annually**, yet most operate with batch processing systems:
 
 | Challenge | Business Impact |
 |:----------|:----------------|
-| **Delayed Fraud Detection** | Fraudulent claims processed before patterns identified — costing insurers **$80B+ annually** |
-| **Manual Processing Bottlenecks** | 15-45 day average claim settlement time |
-| **Lack of Real-Time Visibility** | Executives make decisions on day-old data |
-| **Seasonal Surge Blindness** | Monsoon/winter claim spikes overwhelm systems |
+| **Delayed Fraud Detection** | $80B+ annual losses from undetected fraud |
+| **Manual Processing** | 15-45 day average settlement time |
+| **No Real-Time Visibility** | Decisions based on stale data |
+| **Seasonal Blindness** | Systems overwhelmed during peak periods |
 
 > **$308.6 billion** — Annual cost of insurance fraud to U.S. consumers
-> *Source: Coalition Against Insurance Fraud*
 
 ---
 
 ## The Solution
 
-This platform leverages **Microsoft Fabric Real-Time Intelligence** to create an end-to-end streaming analytics solution:
+End-to-end streaming analytics using **Microsoft Fabric Real-Time Intelligence**:
 
 ```
 ┌──────────────┐     ┌─────────────────────────────────────────────────────────────┐
 │              │     │                    MICROSOFT FABRIC                         │
 │   Python     │     │                                                             │
 │   Simulator  │────▶│   Event Hub  ───▶  Eventstream  ───▶  Eventhouse (KQL)     │
-│              │     │       │                                      │              │
-│  1,000+/sec  │     │       │                                      ▼              │
-│              │     │       │         ┌─────────────────────────────────────┐     │
-└──────────────┘     │       │         │     Real-Time Dashboard            │     │
-                     │       │         │     • Live Claims Metrics          │     │
-                     │       │         │     • Fraud Detection Alerts       │     │
-                     │       │         │     • Hospital Analytics           │     │
-                     │       │         └─────────────────────────────────────┘     │
-                     │       │                          │                          │
-                     │       ▼                          ▼                          │
-                     │   Real-Time Hub            Activator                        │
-                     │   (Discovery)              (Alerts → Email/Teams)           │
-                     │                                                             │
+│              │     │                                             │               │
+│  1,000+/sec  │     │                                             ▼               │
+│              │     │                    Real-Time Dashboard ◄────┘               │
+└──────────────┘     │                           │                                 │
+                     │                           ▼                                 │
+                     │                      Activator (Alerts)                     │
                      └─────────────────────────────────────────────────────────────┘
 ```
 
-### Key Capabilities
-
-| Capability | Description |
-|:-----------|:------------|
-| **Sub-second Latency** | From claim event to dashboard visualization |
-| **Fraud Pattern Detection** | Statistical anomaly detection on claim amounts |
-| **Seasonality-Aware** | Automatic volume adjustment for monsoon/winter periods |
-| **Real-time KPIs** | Settlement rates, denial patterns, processing times |
-
 ---
 
-## Microsoft Fabric Features
+## Documentation
 
-| Feature | Purpose | Docs |
-|:--------|:--------|:-----|
-| **Real-Time Hub** | Central discovery for streaming data | [Learn more →](https://learn.microsoft.com/en-us/fabric/real-time-hub/real-time-hub-overview) |
-| **Eventstream** | No-code stream ingestion & transformation | [Learn more →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/overview) |
-| **Eventhouse** | Time-series optimized KQL storage | [Learn more →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/eventhouse) |
-| **Real-Time Dashboard** | Live visualizations (10-sec refresh) | [Learn more →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/dashboard-real-time-create) |
-| **Activator** | Event-driven alerts & automation | [Learn more →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/data-activator/activator-introduction) |
+| Guide | Description |
+|:------|:------------|
+| [**01-FABRIC-FUNDAMENTALS.md**](docs/01-FABRIC-FUNDAMENTALS.md) | Workspace, Lakehouse, OneLake, Data Factory setup |
+| [**02-RTI-SETUP.md**](docs/02-RTI-SETUP.md) | Eventstream, Eventhouse, Dashboard, Activator setup |
+| [**03-AZURE-EVENTHUBS.md**](docs/03-AZURE-EVENTHUBS.md) | Event Hub namespace, credentials, Data Lake config |
 
 ---
 
@@ -102,14 +83,17 @@ pip install azure-eventhub
 ### 2. Configure
 
 ```bash
-cp config.json.example config.json
-# Edit config.json with your Event Hub connection string
+# Copy config templates
+cp config/eventhub.json.example config/eventhub.json
+
+# Edit with your credentials
+# config/eventhub.json
 ```
 
 ### 3. Run Simulator
 
 ```bash
-python simulator.py
+python src/simulator.py
 ```
 
 ```
@@ -126,7 +110,48 @@ Streaming CLAIM events @ ~1000/sec
 Press Ctrl+C to stop
 ```
 
-> **Full setup guide:** See [SETUP.md](SETUP.md) for detailed Fabric configuration steps.
+---
+
+## Project Structure
+
+```
+fabric-hackathon-rti/
+│
+├── README.md                      # This file
+├── LICENSE                        # MIT License
+├── SETUP.md                       # Quick setup reference
+│
+├── docs/                          # Documentation
+│   ├── 01-FABRIC-FUNDAMENTALS.md  # Fabric basics setup
+│   ├── 02-RTI-SETUP.md            # Real-Time Intelligence setup
+│   └── 03-AZURE-EVENTHUBS.md      # Azure Event Hubs setup
+│
+├── src/                           # Source code
+│   ├── simulator.py               # Python event simulator
+│   └── kql/                       # KQL query library
+│       ├── claims-overview.kql
+│       ├── fraud-detection.kql
+│       └── hospital-analytics.kql
+│
+└── config/                        # Configuration templates
+    ├── eventhub.json.example      # Event Hub config
+    ├── datalake.json.example      # Data Lake Storage config
+    └── fabric.json.example        # Fabric workspace config
+```
+
+---
+
+## Microsoft Fabric Features
+
+| Feature | Purpose | Documentation |
+|:--------|:--------|:--------------|
+| **Real-Time Hub** | Central discovery for streams | [Docs →](https://learn.microsoft.com/en-us/fabric/real-time-hub/real-time-hub-overview) |
+| **Eventstream** | No-code stream ingestion | [Docs →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/overview) |
+| **Eventhouse** | KQL database for time-series | [Docs →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/eventhouse) |
+| **Real-Time Dashboard** | Live visualizations | [Docs →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/dashboard-real-time-create) |
+| **Activator** | Event-driven alerts | [Docs →](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/data-activator/activator-introduction) |
+| **Lakehouse** | Unified data storage | [Docs →](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview) |
+| **Data Factory** | Pipeline orchestration | [Docs →](https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview) |
 
 ---
 
@@ -156,27 +181,24 @@ Press Ctrl+C to stop
 
 | Parameter | Values |
 |:----------|:-------|
-| **Seasonality** | Winter (Dec-Jan): 1.4x · Monsoon (Jun-Sep): 1.6x |
-| **Status Distribution** | Settled: 82% · Pending: 13% · Denied: 5% |
-| **Claim Types** | Cashless: 65% · Reimbursement: 35% |
-| **Fraud Indicators** | High amount + Low admissibility + Reimbursement |
+| **Seasonality** | Winter: 1.4x · Monsoon: 1.6x |
+| **Status** | Settled: 82% · Pending: 13% · Denied: 5% |
+| **Types** | Cashless: 65% · Reimbursement: 35% |
+| **Fraud Signals** | High amount + Low admissibility |
 
 ---
 
 ## Sample KQL Queries
 
-### Real-Time Claims Overview
+### Real-Time Overview
 
 ```kql
 ClaimsRaw
 | where event_time > ago(1h)
-| summarize
-    TotalClaims = count(),
-    TotalAmount = sum(total_amount),
-    AvgProcessingDays = avg(processing_days)
+| summarize TotalClaims = count(), TotalAmount = sum(total_amount)
 ```
 
-### Fraud Detection — High Amount Anomalies
+### Fraud Detection
 
 ```kql
 ClaimsRaw
@@ -184,49 +206,11 @@ ClaimsRaw
 | where claim_type == "Reimbursement"
 | where total_amount > 100000
 | where (admissible_amount * 1.0 / total_amount) < 0.7
-| project claim_id, policy_id, hospital_id, total_amount, admissible_amount
+| project claim_id, policy_id, total_amount
 | order by total_amount desc
 ```
 
-### Hospital Claims Trend
-
-```kql
-ClaimsRaw
-| where event_time > ago(7d)
-| summarize ClaimCount = count(), TotalAmount = sum(total_amount) by hospital_id
-| top 10 by TotalAmount desc
-| render barchart
-```
-
-> **More queries:** See [`kql/`](kql/) folder for fraud detection, claims overview, and hospital analytics queries.
-
----
-
-## Activator Alerts
-
-| Alert | Trigger | Action |
-|:------|:--------|:-------|
-| **Fraud Suspected** | `denial_reason == "Fraud Suspected"` | Email to fraud team |
-| **High Volume Spike** | Claims/minute > 2000 | Teams notification |
-| **Settlement Delay** | Processing days > 30 | Email to operations |
-| **High Amount Claim** | Total amount > 500,000 | Manager approval |
-
----
-
-## Project Structure
-
-```
-fabric-hackathon-rti/
-├── simulator.py           # Python event simulator
-├── config.json.example    # Configuration template
-├── README.md              # This file
-├── SETUP.md               # Detailed setup guide
-├── LICENSE                # MIT License
-└── kql/
-    ├── claims-overview.kql
-    ├── fraud-detection.kql
-    └── hospital-analytics.kql
-```
+> See [`src/kql/`](src/kql/) for complete query library.
 
 ---
 
@@ -235,23 +219,52 @@ fabric-hackathon-rti/
 | Metric | Before | After | Improvement |
 |:-------|:-------|:------|:------------|
 | Fraud Detection | 15-30 days | < 1 minute | **99.9% faster** |
-| Dashboard Refresh | Daily batch | 10 seconds | **Real-time** |
-| Anomaly Response | Manual review | Automated | **Instant** |
-| Processing Visibility | End-of-day | Live stream | **24/7** |
+| Dashboard Refresh | Daily | 10 seconds | **Real-time** |
+| Anomaly Response | Manual | Automated | **Instant** |
+
+---
+
+## Configuration Reference
+
+### Event Hub Connection
+```json
+{
+  "eventhub": {
+    "connection_string": "Endpoint=sb://NAMESPACE.servicebus.windows.net/;...",
+    "name": "claims-stream"
+  }
+}
+```
+
+### Data Lake Storage
+```json
+{
+  "datalake": {
+    "url": "https://ACCOUNT.dfs.core.windows.net/",
+    "sas_token": "sv=2024-11-04&ss=bf&..."
+  }
+}
+```
+
+> See [`config/`](config/) for complete templates.
 
 ---
 
 ## References
 
-**Microsoft Fabric Documentation:**
-- [Real-Time Intelligence Overview](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/overview)
-- [Eventstream Documentation](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/overview)
-- [Eventhouse Documentation](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/eventhouse)
-- [Activator Documentation](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/data-activator/activator-introduction)
-- [Azure Event Hubs Python SDK](https://learn.microsoft.com/en-us/python/api/overview/azure/eventhub-readme)
+**Microsoft Fabric:**
+- [Real-Time Intelligence](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/overview)
+- [Eventstream](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/overview)
+- [Eventhouse](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/eventhouse)
+- [Activator](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/data-activator/activator-introduction)
+- [OneLake](https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview)
+
+**Azure:**
+- [Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/)
+- [Python SDK](https://learn.microsoft.com/en-us/python/api/overview/azure/eventhub-readme)
 
 **Training:**
-- [Explore Real-Time Analytics in Microsoft Fabric](https://learn.microsoft.com/en-us/training/paths/explore-real-time-analytics-microsoft-fabric/)
+- [Real-Time Analytics Learning Path](https://learn.microsoft.com/en-us/training/paths/explore-real-time-analytics-microsoft-fabric/)
 
 ---
 

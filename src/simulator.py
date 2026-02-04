@@ -21,8 +21,23 @@ from azure.eventhub import EventData
 shutdown_event = asyncio.Event()
 
 # ---------------- LOAD CONFIG ----------------
-def load_config(path="config.json") -> Dict[str, Any]:
+def load_config(path=None) -> Dict[str, Any]:
     """Load configuration from JSON file."""
+    if path is None:
+        # Search for config in multiple locations
+        possible_paths = [
+            "config/eventhub.json",           # From project root
+            "../config/eventhub.json",        # From src/ directory
+            "eventhub.json",                  # Local file
+            "config.json"                     # Legacy fallback
+        ]
+        for p in possible_paths:
+            try:
+                with open(p) as f:
+                    return json.load(f)
+            except FileNotFoundError:
+                continue
+        raise FileNotFoundError("No configuration file found")
     with open(path) as f:
         return json.load(f)
 
@@ -192,25 +207,29 @@ async def main():
     try:
         config = load_config()
     except FileNotFoundError:
-        print("\nERROR: config.json not found!")
-        print("Please copy config.json.example to config.json and add your credentials.")
+        print("\nERROR: Configuration file not found!")
+        print("Please copy config/eventhub.json.example to config/eventhub.json")
+        print("and add your Event Hub credentials.")
         sys.exit(1)
 
-    sim = config["simulator"]
-    eh = config["eventhub"]
+    sim = config.get("simulator", {})
+    eh = config.get("eventhub", {})
 
     rate = sim.get("default_rate", 1000)
+    hub_name = eh.get("name", "claims-stream")
+    conn_string = eh.get("connection_string", "")
+
+    if not conn_string:
+        print("\nERROR: Event Hub connection_string not configured!")
+        sys.exit(1)
 
     print(f"\nConfiguration:")
-    print(f"  Event Hub: {eh['eventhub_name']}")
+    print(f"  Event Hub: {hub_name}")
     print(f"  Target Rate: {rate:,} events/sec")
     print()
 
     generator = ClaimMessageGenerator()
-    sender = EventHubSender(
-        eh["connection_string"],
-        eh["eventhub_name"]
-    )
+    sender = EventHubSender(conn_string, hub_name)
 
     print(f"Streaming CLAIM events @ ~{rate}/sec")
     print("Press Ctrl+C to stop\n")
