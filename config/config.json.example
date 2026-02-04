@@ -1,9 +1,0 @@
-{
-  "simulator": {
-    "default_rate": 1000
-  },
-  "eventhub": {
-    "connection_string": "Endpoint=sb://YOUR_NAMESPACE.servicebus.windows.net/;SharedAccessKeyName=YOUR_KEY_NAME;SharedAccessKey=YOUR_KEY;EntityPath=YOUR_EVENTHUB_NAME",
-    "eventhub_name": "YOUR_EVENTHUB_NAME"
-  }
-}

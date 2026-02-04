@@ -54,8 +54,8 @@ Before starting, ensure you have:
 ### Step 2.1: Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/fabric-claims-intelligence.git
-cd fabric-claims-intelligence
+git clone https://github.com/mandelbulbtech-partners/fabric-hackathon-rti.git
+cd fabric-hackathon-rti
 ```
 
 ### Step 2.2: Create Virtual Environment (Recommended)
@@ -73,25 +73,28 @@ source venv/bin/activate
 ### Step 2.3: Install Dependencies
 
 ```bash
-pip install azure-eventhub
+pip install -r requirements.txt
 ```
 
 ### Step 2.4: Configure Credentials
 
 ```bash
-cp config.json.example config.json
+cp config/eventhub.json.example config/eventhub.json
 ```
 
-Edit `config.json` with your Event Hub details:
+Edit `config/eventhub.json` with your Event Hub details:
 
 ```json
 {
   "simulator": {
-    "default_rate": 1000
+    "default_rate": 1000,
+    "batch_size": 100
   },
   "eventhub": {
+    "namespace": "YOUR_NAMESPACE.servicebus.windows.net",
+    "name": "claims-stream",
     "connection_string": "YOUR_CONNECTION_STRING_FROM_STEP_1.3",
-    "eventhub_name": "claims-stream"
+    "consumer_group": "$Default"
   }
 }
 ```
@@ -99,7 +102,7 @@ Edit `config.json` with your Event Hub details:
 ### Step 2.5: Test the Simulator
 
 ```bash
-python simulator.py
+python src/simulator.py
 ```
 
 You should see:
@@ -185,10 +188,10 @@ Press Ctrl+C to stop
 
 #### Create Dashboard Tiles:
 
-Use the KQL queries from the `kql/` folder to create tiles:
+Use the KQL queries from the `src/kql/` folder to create tiles:
 
 1. Click **Add tile**
-2. Paste query from `kql/claims-overview.kql`
+2. Paste query from `src/kql/claims-overview.kql`
 3. Configure visualization
 4. Click **Apply changes**
 
@@ -215,7 +218,7 @@ Repeat for fraud detection and hospital analytics queries.
 
 1. **Start simulator** (if not running):
    ```bash
-   python simulator.py
+   python src/simulator.py
    ```
 
 2. **Check Eventstream**:
