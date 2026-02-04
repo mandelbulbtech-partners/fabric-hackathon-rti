@@ -6,10 +6,8 @@ Streaming FACT table for RTI Dashboard (Microsoft Fabric)
 Microsoft Fabric Hackathon 2025 - Real-Time Intelligence Category
 """
 
-import os
 import sys
 import json
-import time
 import random
 import asyncio
 import uuid
